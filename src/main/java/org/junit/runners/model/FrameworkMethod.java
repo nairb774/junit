@@ -63,9 +63,7 @@ public class FrameworkMethod extends FrameworkMember<FrameworkMethod> {
 	 * <li>is not static (given {@code isStatic is true}).
 	 */
 	public void validatePublicVoidNoArg(boolean isStatic, List<Throwable> errors) {
-		validatePublicVoid(isStatic, errors);
-		if (fMethod.getParameterTypes().length != 0)
-			errors.add(new Exception("Method " + fMethod.getName() + " should have no parameters"));
+		validatePublicNoArg(isStatic, Void.TYPE, errors);
 	}
 
 
@@ -78,6 +76,35 @@ public class FrameworkMethod extends FrameworkMember<FrameworkMethod> {
 	 * <li>is not static (given {@code isStatic is true}).
 	 */
 	public void validatePublicVoid(boolean isStatic, List<Throwable> errors) {
+		validatePublic(isStatic, Void.TYPE, errors);
+	}
+
+
+	/**
+	 * Adds to {@code errors} if this method:
+	 * <ul>
+	 * <li>is not public, or
+	 * <li>takes parameters, or
+	 * <li>returns something other than {@code returnType} or one of {@code returnType}'s subtype, or
+	 * <li>is static (given {@code isStatic is false}), or
+	 * <li>is not static (given {@code isStatic is true}).
+	 */
+	public void validatePublicNoArg(boolean isStatic, Class<?> returnType, List<Throwable> errors) {
+		validatePublic(isStatic, returnType, errors);
+		if (fMethod.getParameterTypes().length != 0)
+			errors.add(new Exception("Method " + fMethod.getName() + " should have no parameters"));
+	}
+
+
+	/**
+	 * Adds to {@code errors} if this method:
+	 * <ul>
+	 * <li>is not public, or
+	 * <li>returns something other than {@code returnType} or one of {@code returnType}'s subtype, or
+	 * <li>is static (given {@code isStatic is false}), or
+	 * <li>is not static (given {@code isStatic is true}).
+	 */
+	public void validatePublic(boolean isStatic, Class<?> returnType, List<Throwable> errors) {
 		if (Modifier.isStatic(fMethod.getModifiers()) != isStatic) {
 			String state= isStatic ? "should" : "should not";
 			errors.add(new Exception("Method " + fMethod.getName() + "() " + state + " be static"));
@@ -86,8 +113,8 @@ public class FrameworkMethod extends FrameworkMember<FrameworkMethod> {
 			errors.add(new Exception("Class " + fMethod.getDeclaringClass().getName() + " should be public"));
 		if (!Modifier.isPublic(fMethod.getModifiers()))
 			errors.add(new Exception("Method " + fMethod.getName() + "() should be public"));
-		if (fMethod.getReturnType() != Void.TYPE)
-			errors.add(new Exception("Method " + fMethod.getName() + "() should be void"));
+		if (!returnType.isAssignableFrom(fMethod.getReturnType()))
+			errors.add(new Exception("Method " + fMethod.getName() + "() should return type implementing " + returnType.getName()));
 	}
 
 	@Override

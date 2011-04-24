@@ -243,4 +243,31 @@ public class RulesTest {
 		assertThat(testResult(PrivateRule.class), 
 				hasSingleFailureContaining("must be public"));
 	}
+	
+	public static class PublicMethod {
+		private static String name;
+		private static TestName testName= new TestName();
+		@Rule public MethodRule getRule() {
+			return testName;
+		}
+		@Test public void foo() {
+			name= testName.getMethodName();
+		}
+	}
+	
+	@Test public void validatePublicMethodWorks() {
+		PublicMethod.name = null;
+		JUnitCore.runClasses(PublicMethod.class);
+		assertThat(PublicMethod.name, is("foo"));
+	}
+	
+	public static class WrongTypeMethodRule {
+		@Rule public void rule() {}
+		@Test public void foo() {}
+	}
+	
+	@Test public void validateReturnTypeIsChecked() {
+		assertThat(testResult(WrongTypeMethodRule.class),
+				hasSingleFailureContaining("should return type implementing org.junit.rules.MethodRule"));
+	}
 }

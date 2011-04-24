@@ -116,10 +116,15 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
 	 */
 	protected void validatePublicVoidNoArgMethods(Class<? extends Annotation> annotation,
 			boolean isStatic, List<Throwable> errors) {
+		validatePublicNoArgMethods(annotation, isStatic, Void.TYPE, errors);
+	}
+	
+	protected void validatePublicNoArgMethods(Class<? extends Annotation> annotation,
+			boolean isStatic, Class<?> returnType, List<Throwable> errors) {
 		List<FrameworkMethod> methods= getTestClass().getAnnotatedMethods(annotation);
 
 		for (FrameworkMethod eachTestMethod : methods)
-			eachTestMethod.validatePublicVoidNoArg(isStatic, errors);
+			eachTestMethod.validatePublicNoArg(isStatic, returnType, errors);
 	}
 
 	/** 

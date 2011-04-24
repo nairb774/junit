@@ -171,6 +171,7 @@ public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
 	protected void validateInstanceMethods(List<Throwable> errors) {
 		validatePublicVoidNoArgMethods(After.class, false, errors);
 		validatePublicVoidNoArgMethods(Before.class, false, errors);
+		validatePublicNoArgMethods(Rule.class, false, MethodRule.class, errors);
 		validateTestMethods(errors);
 
 		if (computeTestMethods().size() == 0)
@@ -352,6 +353,12 @@ public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
 		for (MethodRule each : getTestClass().getAnnotatedFieldValues(target,
 				Rule.class, MethodRule.class))
 			result= each.apply(result, method, target);
+		for (FrameworkMethod ruleMethod : getTestClass().getAnnotatedMethods(Rule.class))
+			try {
+				result= ((MethodRule) ruleMethod.invokeExplosively(target)).apply(result, method, target);
+			} catch (Throwable e) {
+				return new Fail(e);
+			}
 		return result;
 	}
 
